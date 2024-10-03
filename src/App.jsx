@@ -1,19 +1,70 @@
+import styles from './app.module.css'
+import data from './data.json'
 import { useState } from 'react'
-import ReactLogo from './assets/react.svg?react'
-import './App.css'
-
-const thisYear = new Date().getFullYear()
 
 export const App = () => {
-	const [count, setCount] = useState(0)
+	const [steps, setSteps] = useState(data)
+	const [activeIndex, setActiveIndex] = useState(0)
+
+	const goBack = () => {
+		setActiveIndex(activeIndex - 1)
+	}
+	const goForward = () => {
+		setActiveIndex(activeIndex + 1)
+	}
+	const resetSteps = () => {
+		setActiveIndex(0)
+	}
+	const onStepButtonClick = i => {
+		setActiveIndex(i)
+	}
+
+	const isFirstStep = activeIndex === 0
+	const isLastStep = activeIndex === steps.length - 1
+
+	// document.location.hash = activeIndex
 
 	return (
-		<>
-			<h1>Hello World!</h1>
-			<ReactLogo />
-			<h2>{thisYear}</h2>
-
-			<hr />
-		</>
+		<div className={styles.container}>
+			<div className={styles.card}>
+				<h1>{steps[activeIndex].title}</h1>
+				<div className={styles.steps}>
+					<div className={styles['steps-content']}>
+						{steps[activeIndex].content}
+					</div>
+					<ul className={styles['steps-list']}>
+						{steps.map(({ id }, index) => (
+							<li
+								key={id}
+								className={`${styles['steps-item']} ${index === activeIndex ? styles.active : ''} ${index < activeIndex ? styles.done : ''}`}
+							>
+								<button
+									type="button"
+									className={styles['steps-item-button']}
+									onClick={() => onStepButtonClick(index)}
+								>
+									{index + 1}
+								</button>
+							</li>
+						))}
+					</ul>
+					<div className={styles['buttons-container']}>
+						<button
+							className={styles.button}
+							onClick={goBack}
+							disabled={isFirstStep}
+						>
+							Назад
+						</button>
+						<button
+							className={styles.button}
+							onClick={isLastStep ? resetSteps : goForward}
+						>
+							{isLastStep ? 'Начать сначала' : 'Далее'}
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	)
 }
