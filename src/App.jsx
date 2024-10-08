@@ -1,69 +1,85 @@
-import styles from './app.module.css'
-import data from './data.json'
+import classes from './App.module.scss'
 import { useState } from 'react'
 
 export const App = () => {
-	const [steps, setSteps] = useState(data)
-	const [activeIndex, setActiveIndex] = useState(0)
+	const [operand1, setOperand1] = useState('')
+	const [operand2, setOperand2] = useState('')
+	const [operator, setOperator] = useState('')
+	const [result, setResult] = useState(null)
 
-	const goBack = () => {
-		setActiveIndex(activeIndex - 1)
-	}
-	const goForward = () => {
-		setActiveIndex(activeIndex + 1)
-	}
-	const resetSteps = () => {
-		setActiveIndex(0)
-	}
-	const onStepButtonClick = i => {
-		setActiveIndex(i)
+	const handleOperand = num => {
+		if (isNum(num)) {
+			if (operator === '') {
+				setOperand1(prevState => prevState + num)
+			} else {
+				setOperand2(prevState => prevState + num)
+			}
+		} else if (num === 'c' || num === '=') {
+			handleResult(num)
+		} else {
+			setOperator(num)
+		}
+
+		if (result && operator) {
+			setOperand1(result)
+			setResult('')
+		}
 	}
 
-	const isFirstStep = activeIndex === 0
-	const isLastStep = activeIndex === steps.length - 1
+	const handleResult = num => {
+		if (num === '=') {
+			setResult(eval(`${Number(operand1)}${operator}${Number(operand2)}`))
+		} else {
+			setResult('')
+		}
+		setOperand1('')
+		setOperand2('')
+		setOperator('')
+	}
 
-	// document.location.hash = activeIndex
+	const nums = [
+		'1',
+		'2',
+		'3',
+		'c',
+		'4',
+		'5',
+		'6',
+		'+',
+		'7',
+		'8',
+		'9',
+		'-',
+		'0',
+		'='
+	]
+
+	const isNum = item => {
+		return Boolean(Number(item)) || item === '0'
+	}
 
 	return (
-		<div className={styles.container}>
-			<div className={styles.card}>
-				<h1>{steps[activeIndex].title}</h1>
-				<div className={styles.steps}>
-					<div className={styles['steps-content']}>
-						{steps[activeIndex].content}
-					</div>
-					<ul className={styles['steps-list']}>
-						{steps.map(({ id }, index) => (
-							<li
-								key={id}
-								className={`${styles['steps-item']} ${index === activeIndex ? styles.active : ''} ${index < activeIndex ? styles.done : ''}`}
-							>
-								<button
-									type="button"
-									className={styles['steps-item-button']}
-									onClick={() => onStepButtonClick(index)}
-								>
-									{index + 1}
-								</button>
-							</li>
-						))}
-					</ul>
-					<div className={styles['buttons-container']}>
-						<button
-							className={styles.button}
-							onClick={goBack}
-							disabled={isFirstStep}
-						>
-							Назад
-						</button>
-						<button
-							className={styles.button}
-							onClick={isLastStep ? resetSteps : goForward}
-						>
-							{isLastStep ? 'Начать сначала' : 'Далее'}
-						</button>
-					</div>
+		<div className={classes.container}>
+			<div className={classes.display}>
+				<div>
+					{operand1} {operator} {operand2}
 				</div>
+				<div style={{ color: 'green' }}>{result}</div>
+			</div>
+			<div className={classes.buttons}>
+				{nums.map(num => (
+					<button
+						key={num}
+						className={
+							isNum(num)
+								? classes.button
+								: `${classes.button} ${classes.operator}`
+						}
+						onClick={() => handleOperand(num)}
+					>
+						{num}
+					</button>
+				))}
 			</div>
 		</div>
 	)
