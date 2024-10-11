@@ -2,39 +2,73 @@ import classes from './App.module.scss'
 import { useState } from 'react'
 
 export const App = () => {
-	const [operand1, setOperand1] = useState('')
-	const [operand2, setOperand2] = useState('')
-	const [operator, setOperator] = useState('')
-	const [result, setResult] = useState(null)
+	const [calcState, setCalcState] = useState({
+		operand1: '',
+		operand2: '',
+		operator: '',
+		result: null
+	})
 
 	const handleOperand = num => {
 		if (isNum(num)) {
-			if (operator === '') {
-				setOperand1(prevState => prevState + num)
+			if (calcState.operator === '') {
+				setCalcState(prevState => ({
+					...prevState,
+					operand1: calcState.operand1 + num,
+					result: ''
+				}))
 			} else {
-				setOperand2(prevState => prevState + num)
+				setCalcState(prevState => ({
+					...prevState,
+					operand2: calcState.operand2 + num
+				}))
 			}
 		} else if (num === 'c' || num === '=') {
 			handleResult(num)
 		} else {
-			setOperator(num)
+			setCalcState(prevState => ({
+				...prevState,
+				operator: num
+			}))
 		}
 
-		if (result && operator) {
-			setOperand1(result)
-			setResult('')
+		if (calcState.result && calcState.operator) {
+			setCalcState(prevState => ({
+				...prevState,
+				operand1: calcState.result,
+				result: ''
+			}))
+		}
+	}
+
+	const calculation = operator => {
+		if (operator === '+') {
+			return Number(calcState.operand1) + Number(calcState.operand2)
+		} else if (operator === '-') {
+			return Number(calcState.operand1) - Number(calcState.operand2)
+		} else {
+			return Number(calcState.result)
 		}
 	}
 
 	const handleResult = num => {
 		if (num === '=') {
-			setResult(eval(`${Number(operand1)}${operator}${Number(operand2)}`))
+			setCalcState(prevState => ({
+				...prevState,
+				result: `${calculation(calcState.operator)}`
+			}))
 		} else {
-			setResult('')
+			setCalcState(prevState => ({
+				...prevState,
+				result: ''
+			}))
 		}
-		setOperand1('')
-		setOperand2('')
-		setOperator('')
+		setCalcState(prevState => ({
+			...prevState,
+			operand1: '',
+			operator: '',
+			operand2: ''
+		}))
 	}
 
 	const nums = [
@@ -62,9 +96,9 @@ export const App = () => {
 		<div className={classes.container}>
 			<div className={classes.display}>
 				<div>
-					{operand1} {operator} {operand2}
+					{calcState.operand1} {calcState.operator} {calcState.operand2}
 				</div>
-				<div style={{ color: 'green' }}>{result}</div>
+				<div style={{ color: 'green' }}>{calcState.result}</div>
 			</div>
 			<div className={classes.buttons}>
 				{nums.map(num => (
