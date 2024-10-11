@@ -3,7 +3,7 @@ import style from './App.module.scss'
 
 const setTime = () => {
 	const date = new Date()
-	const currentTime = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()} ${date.toLocaleTimeString('uz-UZ')}`
+	const currentTime = `${date.toLocaleDateString('uz-Uz')} ${date.toLocaleTimeString('uz-UZ')}`
 	return `${currentTime}`
 }
 
@@ -12,8 +12,8 @@ console.log(setTime())
 export const App = () => {
 	const [isValidValue, setIsValidValue] = useState(false)
 	const onInputButtonClick = () => {
-		const promptValue = prompt().trim()
-		if (promptValue.length > 3) {
+		const promptValue = prompt()
+		if (promptValue !== null && promptValue.trim().length > 3) {
 			setValue(promptValue)
 			setError('')
 			setIsValidValue(true)
@@ -23,18 +23,21 @@ export const App = () => {
 		}
 	}
 	const onAddButtonClick = () => {
-		setList(list => [
-			...list,
+		setList(prevList => [
 			{
 				id: Date.now(),
 				value,
+				time: setTime()
 			},
+			...prevList
 		])
 		setIsListEmpty(false)
+		setValue('')
+		setIsValidValue(false)
 	}
 
-	const [value, setValue] = useState()
-	const [error, setError] = useState()
+	const [value, setValue] = useState('')
+	const [error, setError] = useState('')
 	const [list, setList] = useState([])
 	const [isListEmpty, setIsListEmpty] = useState(true)
 	return (
@@ -70,7 +73,7 @@ export const App = () => {
 					{list.map(item => (
 						<li key={item.id}>
 							<strong>{item.value}</strong>{' '}
-							<span className={style.date}>{setTime()}</span>
+							<span className={style.date}>{item.time}</span>
 						</li>
 					))}
 				</ul>
