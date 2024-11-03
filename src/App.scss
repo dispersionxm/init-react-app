@@ -1,0 +1,65 @@
+#root {
+	max-width: 1280px;
+	margin: 0 auto;
+	padding: 2rem;
+	text-align: center;
+	box-sizing: border-box;
+}
+
+h1 {
+	font-size: 2rem;
+	line-height: 1.1;
+}
+
+.register {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	//text-align: center;
+
+	> input {
+		width: 100%;
+		min-width: 400px;
+		display: block;
+		padding: 6px 8px;
+		font-size: 16px;
+		outline: none;
+		border: 1px solid transparent;
+		transition: border-color 0.4s;
+		background-color: #444;
+		border-radius: 5px;
+		margin-bottom: 25px;
+
+		&:focus {
+			border-color: aqua;
+		}
+
+		> button {
+			text-align: center;
+			display: block;
+			cursor: pointer;
+			width: 200px;
+			padding: 6px;
+			border: 1px solid transparent;
+			border-radius: 5px;
+			background-color: #444;
+			transition: border-color 0.4s;
+
+			&:hover {
+				border-color: aqua;
+				color: aqua;
+			}
+		}
+	}
+
+	> p {
+		font-size: 14px;
+		text-align: left;
+		margin: 0;
+	}
+}
+
+.label-error {
+	color: tomato;
+}
