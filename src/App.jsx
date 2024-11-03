@@ -1,173 +1,88 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
+import { useForm } from 'react-hook-form'
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
 import './App.scss'
 
-const initialState = {
-	email: '',
-	password: '',
-	confirmedPassword: '',
-}
-
-const useStore = () => {
-	const [state, setState] = useState(initialState)
-
-	return {
-		getState() {
-			return state
-		},
-		updateState(element, newValue) {
-			setState({
-				...state,
-				[element]: newValue,
-			})
-		},
-		resetState() {
-			setState(initialState)
-		},
-	}
+const sendFormData = formData => {
+	console.log(formData)
 }
 
 export const App = () => {
-	const { getState, updateState, resetState } = useStore()
-	const [registerError, setRegisterError] = useState({
-		emailError: '',
-		passwordError: '',
-		confirmedPasswordError: '',
+	const registerFormSchema = yup.object().shape({
+		email: yup
+			.string()
+			.matches(
+				/^[A-Z0-9._]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+				'Адрес электронной почты неверный...',
+			),
+		password: yup
+			.string()
+			.min(8, 'Неверный пароль. Должно быть не меньше 8 символов')
+			.required('Пароль обязателен'),
+		confirmedPassword: yup
+			.string()
+			.oneOf([yup.ref('password'), null], 'Пароли должны совпадать')
+			.required('Подтверждение пароля обязательно'),
+	})
+
+	const {
+		watch,
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm({
+		defaultValues: {
+			email: '',
+			password: '',
+			confirmedPassword: '',
+		},
+		resolver: yupResolver(registerFormSchema),
 	})
 
 	const submitButtonRef = useRef(null)
 
-	const { email, password, confirmedPassword } = getState()
-	const { emailError, passwordError, confirmedPasswordError } = registerError
+	const password = watch('password')
+	const confirmPassword = watch('confirmPassword')
 
-	const handleSubmit = event => {
-		event.preventDefault()
-
-		const formData = getState()
-
-		//sendDataToTheBackend(formData)
-		console.log(formData)
-
-		resetState()
-	}
-
-	const onEmailChange = ({ target }) => {
-		updateState(target.name, target.value)
-
-		let newError = null
-
-		if (!/^[A-Z0-9._]+@[A-Z0-9.-]+\.[A-Z]{1,4}$/i.test(email)) {
-			newError = 'email is incorrect'
-		}
-
-		setRegisterError({
-			...registerError,
-			emailError: newError,
-		})
-	}
-
-	const onPasswordChange = ({ target }) => {
-		updateState(target.name, target.value)
-
-		let newError = null
-
-		if (password.length < 8) {
-			newError = 'Password must be at least 8 symbols!'
-		} else if (password.length > 20) {
-			newError = 'Password must be less than 20symbols!'
-		}
-
-		setRegisterError({
-			...registerError,
-			passwordError: newError,
-		})
-	}
-
-	const onConfirmedPasswordChange = ({ target }) => {
-		updateState(target.name, target.value)
-
-		let newError = null
-
-		if (confirmedPassword.length < 8) {
-			newError = 'Password must be at least 8 symbols!'
-		} else if (confirmedPassword.length > 20) {
-			newError = 'Password must be less than 20symbols!'
-		} else if (
-			emailError !== '' &&
-			(password !== '') === (confirmedPassword !== '')
-		) {
-			submitButtonRef.current.focus()
-		}
-
-		setRegisterError({
-			...registerError,
-			confirmedPasswordError: newError,
-		})
-	}
-
-	if (
-		emailError !== '' &&
-		passwordError !== '' &&
-		confirmedPasswordError !== '' &&
-		!emailError &&
-		!passwordError &&
-		!confirmedPasswordError
-	) {
+	if (password && confirmPassword && password === confirmPassword) {
 		submitButtonRef.current.focus()
 	}
+	// focus не работает
+
+	const emailError = errors.email?.message
+	const passwordError = errors.password?.message
+	const confirmedPasswordError = errors.confirmedPassword?.message
 
 	return (
 		<>
 			<h1>Форма регистрации</h1>
 
-			<form className="register" onSubmit={handleSubmit}>
-				{emailError && <p className="label-error">{emailError}</p>}
+			<form className="register" onSubmit={handleSubmit(sendFormData)}>
+				{emailError && <p className={'label-error'}>{emailError}</p>}
 				<input
 					name={'email'}
 					type={'email'}
 					placeholder="Enter your email..."
-					value={email}
-					onChange={onEmailChange}
+					{...register('email')}
 				/>
-				{passwordError && <p className="label-error">{passwordError}</p>}
+				{passwordError && <p className={'label-error'}>{passwordError}</p>}
 				<input
 					name={'password'}
 					type={'password'}
 					placeholder="Enter password..."
-					value={password}
-					onChange={onPasswordChange}
+					{...register('password')}
 				/>
 				{confirmedPasswordError && (
-					<p className="label-error">{confirmedPasswordError}</p>
+					<p className={'label-error'}>{confirmedPasswordError}</p>
 				)}
 				<input
 					name={'confirmedPassword'}
 					type={'password'}
 					placeholder="Enter password again..."
-					value={confirmedPassword}
-					onChange={onConfirmedPasswordChange}
-					onBlur={() => {
-						if (password !== confirmedPassword) {
-							setRegisterError({
-								...registerError,
-								confirmedPasswordError: 'Passwords have to match',
-							})
-						}
-					}}
+					{...register('confirmedPassword')}
 				/>
-				<button
-					ref={submitButtonRef}
-					type="submit"
-					disabled={
-						!(
-							emailError !== '' &&
-							passwordError !== '' &&
-							confirmedPasswordError !== '' &&
-							!emailError &&
-							!passwordError &&
-							!confirmedPasswordError
-						)
-					}
-				>
+				<button ref={submitButtonRef} type="submit">
 					Зарегистрироваться
 				</button>
 			</form>
