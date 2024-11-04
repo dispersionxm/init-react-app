@@ -55,7 +55,7 @@ export const App = () => {
 
 		let newError = null
 
-		if (!/^[A-Z0-9._]+@[A-Z0-9.-]+\.[A-Z]{1,4}$/i.test(email)) {
+		if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g.test(email)) {
 			newError = 'email is incorrect'
 		}
 
@@ -85,17 +85,21 @@ export const App = () => {
 	const onConfirmedPasswordChange = ({ target }) => {
 		updateState(target.name, target.value)
 
-		let newError = null
-
-		if (confirmedPassword.length < 8) {
-			newError = 'Password must be at least 8 symbols!'
-		} else if (confirmedPassword.length > 20) {
-			newError = 'Password must be less than 20symbols!'
-		} else if (
+		if (
 			emailError !== '' &&
-			(password !== '') === (confirmedPassword !== '')
+			password !== '' &&
+			confirmedPassword !== '' &&
+			password === confirmedPassword
 		) {
 			submitButtonRef.current.focus()
+		}
+	}
+
+	const onConfirmedPasswordBlur = () => {
+		let newError = null
+
+		if (password !== confirmedPassword) {
+			newError = 'Пароли должны совпадать'
 		}
 
 		setRegisterError({
@@ -145,14 +149,7 @@ export const App = () => {
 					placeholder="Enter password again..."
 					value={confirmedPassword}
 					onChange={onConfirmedPasswordChange}
-					onBlur={() => {
-						if (password !== confirmedPassword) {
-							setRegisterError({
-								...registerError,
-								confirmedPasswordError: 'Passwords have to match',
-							})
-						}
-					}}
+					onBlur={onConfirmedPasswordBlur}
 				/>
 				<button
 					ref={submitButtonRef}
